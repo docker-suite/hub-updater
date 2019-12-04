@@ -5,6 +5,7 @@
 ![MicroBadger Layers (tag)](https://img.shields.io/microbadger/layers/dsuite/hub-updater/latest.svg?style=flat-square)
 ![MicroBadger Size (tag)](https://img.shields.io/microbadger/image-size/dsuite/hub-updater/latest.svg?style=flat-square)
 [![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![dockeri.co](https://dockeri.co/image/dsuite/hub-updater)](https://hub.docker.com/r/dsuite/hub-updater)
 
 Update docker hub full description.
 
@@ -21,7 +22,7 @@ Update docker hub full description.
  <tbody>
   <tr>
    <td><code>DOCKER_USERNAME</code></td>
-   <td>Docker-hub user used to login</td>
+   <td>Docker-hub user name used to login</td>
   </tr>
   <tr>
    <td><code>DOCKER_PASSWORD</code></td>
