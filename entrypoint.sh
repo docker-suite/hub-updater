@@ -21,6 +21,8 @@ DOCKER_IMAGE=$(env_get "DOCKER_IMAGE")
 README_FILE=$(env_get "README_FILE" "/data/README.md")
 [ -f "${README_FILE}" ] || ERROR "${README_FILE} not found"
 
+#
+DOCKER_HUB_API_URL="https://hub.docker.com/v2"
 
 #
 # Obtains JWT from Docker Hub.
@@ -36,10 +38,7 @@ get_token() {
   declare -r username="${1}"
   declare -r password="${2}"
 
-  local token=$(curl -s -X POST \
-    -H "Content-Type: application/json" \
-    -d '{"username": "'"${username}"'", "password": "'"${password}"'"}' \
-    https://hub.docker.com/v2/users/login/ | jq -r .token)
+  local token=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${username}'", "password": "'${password}'"}' ${DOCKER_HUB_API_URL}/users/login/ | jq -r .token)
 
   echo "${token}"
 }
@@ -52,24 +51,27 @@ get_token() {
 #
 # Examples:
 #
-#   push_readme "foo/bar" "token"
+#   push_readme "dsuite/hub-updater" "token"
 #
 push_readme() {
-  declare -r image="${1}"
+  declare -r repository="${1}"
   declare -r token="${2}"
 
-  local code=$(jq -n --arg msg "$(<${README_FILE})" \
-    '{"registry":"registry-1.docker.io","full_description": $msg }' | \
-        curl -s -o /dev/null  -L -w "%{http_code}" \
-           https://cloud.docker.com/v2/repositories/"${image}"/ \
-           -d @- -X PATCH \
-           -H "Content-Type: application/json" \
-           -H "Authorization: JWT ${token}")
+  # Url of the repository
+  local docker_repository_url="${DOCKER_HUB_API_URL}/repositories/${repository}/"
 
-  if [[ "${code}" = "200" ]]; then
+  # Send description
+  local response_code=$(curl -s \
+                            --write-out %{response_code} \
+                            --output /dev/null \
+                            -H "Authorization: JWT ${token}" \
+                            -X PATCH --data-urlencode full_description@${README_FILE} ${docker_repository_url} \
+                        )
+
+  if [[ "${response_code}" = "200" ]]; then
     NOTICE "Successfully pushed README.md to Docker Hub"
   else
-    ERROR "Unable to push README.md to Docker Hub, response code: ${code}"
+    ERROR "Unable to push README.md to Docker Hub, response code: ${response_code}"
   fi
 }
 
