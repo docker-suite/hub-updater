@@ -1,5 +1,7 @@
-## Name of the images
+## Meta data about the image
 DOCKER_IMAGE=dsuite/hub-updater
+DOCKER_IMAGE_CREATED=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
+DOCKER_IMAGE_REVISION=$(shell git rev-parse --short HEAD)
 
 ## Current directory
 DIR:=$(strip $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST)))))
@@ -16,6 +18,8 @@ build: ## Build hub-updater
 	@docker build \
 		--build-arg http_proxy=${http_proxy} \
 		--build-arg https_proxy=${https_proxy} \
+		--build-arg DOCKER_IMAGE_CREATED=$(DOCKER_IMAGE_CREATED) \
+		--build-arg DOCKER_IMAGE_REVISION=$(DOCKER_IMAGE_REVISION) \
 		--file $(DIR)/Dockerfile \
 		--tag $(DOCKER_IMAGE):latest \
 		$(DIR)
