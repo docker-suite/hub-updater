@@ -49,10 +49,6 @@ Update docker hub full description.
     README_FILE="/data/README.md" 
 
 	docker run -t --rm \
-		-e http_proxy=${http_proxy} \
-		-e https_proxy=${https_proxy} \
-		-e no_proxy=${no_proxy} \
-		-e DEBUG_LEVEL=DEBUG \
 		-e DOCKER_USERNAME=${DOCKER_USERNAME} \
 		-e DOCKER_PASSWORD=${DOCKER_PASSWORD} \
 		-e DOCKER_IMAGE=${DOCKER_IMAGE} \

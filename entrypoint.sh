@@ -38,7 +38,10 @@ get_token() {
   declare -r username="${1}"
   declare -r password="${2}"
 
-  local token=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${username}'", "password": "'${password}'"}' ${DOCKER_HUB_API_URL}/users/login/ | jq -r .token)
+  local token=$(curl --silent \
+                --header 'Content-Type: application/json' \
+                --data-raw '{"username": "'${username}'", "password": "'${password}'"}' \
+                --request POST ${DOCKER_HUB_API_URL}/users/login/ | jq -r .token)
 
   echo "${token}"
 }
@@ -60,13 +63,16 @@ push_readme() {
   # Url of the repository
   local docker_repository_url="${DOCKER_HUB_API_URL}/repositories/${repository}/"
 
-  # Send description
-  local response_code=$(curl -s \
+  # url encode the full description with jq
+  local full_description=$(jq -Rs '{ full_description: . }' ${README_FILE})
+
+  # update repository description
+  local response_code=$(curl --silent \
                             --write-out %{response_code} \
                             --output /dev/null \
-                            -H "Authorization: JWT ${token}" \
-                            -X PATCH --data-urlencode full_description@${README_FILE} ${docker_repository_url} \
-                        )
+                            --header "Content-Type: application/json" \
+                            --header "Authorization: Bearer ${token}" \
+                            --request PATCH --data-raw "${full_description}" ${docker_repository_url} )
 
   if [[ "${response_code}" = "200" ]]; then
     NOTICE "Successfully pushed README.md to Docker Hub"
